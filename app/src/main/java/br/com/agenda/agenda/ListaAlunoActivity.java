@@ -1,7 +1,5 @@
 package br.com.agenda.agenda;
 
-import android.Manifest;
-import android.Manifest.permission;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -10,19 +8,20 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ContextMenu;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.List;
 
 import br.com.agenda.agenda.adapter.AlunosAdapter;
+import br.com.agenda.agenda.converter.AlunoConverter;
 import br.com.agenda.agenda.dao.AlunoDAO;
 import br.com.agenda.agenda.modelo.Aluno;
-import br.com.agenda.agenda.receiver.SMSReceiver;
 
 import static android.Manifest.permission.*;
 
@@ -60,7 +59,7 @@ public class ListaAlunoActivity extends AppCompatActivity {
 
         registerForContextMenu(listaAlunos);
 
-        if (ActivityCompat.checkSelfPermission(ListaAlunoActivity.this, RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED){
+        if (ActivityCompat.checkSelfPermission(ListaAlunoActivity.this, RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(ListaAlunoActivity.this, new String[]{RECEIVE_SMS}, CODIGO_SMS);
         }
     }
@@ -69,6 +68,22 @@ public class ListaAlunoActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         carregarLista();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_lista_alunos, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_enviar_notas:
+                new EnviaAlunosTask(this).execute();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void carregarLista() {
