@@ -1,6 +1,7 @@
 package br.com.agenda.agenda;
 
 import android.Manifest;
+import android.Manifest.permission;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -21,10 +22,15 @@ import java.util.List;
 import br.com.agenda.agenda.adapter.AlunosAdapter;
 import br.com.agenda.agenda.dao.AlunoDAO;
 import br.com.agenda.agenda.modelo.Aluno;
+import br.com.agenda.agenda.receiver.SMSReceiver;
+
+import static android.Manifest.permission.*;
 
 public class ListaAlunoActivity extends AppCompatActivity {
 
     private ListView listaAlunos;
+
+    public static final Integer CODIGO_SMS = 9;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +59,10 @@ public class ListaAlunoActivity extends AppCompatActivity {
         });
 
         registerForContextMenu(listaAlunos);
+
+        if (ActivityCompat.checkSelfPermission(ListaAlunoActivity.this, RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(ListaAlunoActivity.this, new String[]{RECEIVE_SMS}, CODIGO_SMS);
+        }
     }
 
     @Override
@@ -78,10 +88,10 @@ public class ListaAlunoActivity extends AppCompatActivity {
         itemLigar.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                if (ActivityCompat.checkSelfPermission(ListaAlunoActivity.this, Manifest.permission.CALL_PHONE)
+                if (ActivityCompat.checkSelfPermission(ListaAlunoActivity.this, CALL_PHONE)
                         != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(ListaAlunoActivity.this,
-                            new String[]{Manifest.permission.CALL_PHONE},
+                            new String[]{CALL_PHONE},
                             123);
                 } else {
                     Intent intentLigar = new Intent(Intent.ACTION_CALL);
