@@ -12,7 +12,6 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import br.com.agenda.agenda.ListaAlunoActivity;
 import br.com.agenda.agenda.R;
 import br.com.agenda.agenda.modelo.Aluno;
 
@@ -52,7 +51,7 @@ public class AlunosAdapter extends BaseAdapter {
 
         View view = convertView;
         if (convertView == null) {
-            view = inflater.inflate(R.layout.list_item, null);
+            view = inflater.inflate(R.layout.list_item, parent, false);
         }
 
         TextView campoNome = (TextView) view.findViewById(R.id.item_nome);
@@ -70,6 +69,15 @@ public class AlunosAdapter extends BaseAdapter {
             campoFoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
         }
 
+        TextView campoEndereco = (TextView) view.findViewById(R.id.item_endereco);
+        if (campoEndereco != null) {
+            campoEndereco.setText(aluno.getEndereco());
+        }
+
+        TextView campoSite = (TextView) view.findViewById(R.id.item_site);
+        if (campoSite != null) {
+            campoSite.setText(aluno.getSite());
+        }
         return view;
     }
 }
