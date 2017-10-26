@@ -9,7 +9,6 @@
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.INTERNET" />
 
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -46,6 +45,8 @@
             </intent-filter>
         </receiver>
 
+        <activity android:name=".ProvasActivity" />
+        <activity android:name=".DetalhesProvaActivity"></activity>
     </application>
 
 </manifest>
