@@ -19,7 +19,7 @@ import br.com.agenda.agenda.modelo.Aluno;
 public class AlunoDAO extends SQLiteOpenHelper {
 
     public AlunoDAO(Context context) {
-        super(context, "Agenda", null, 4);
+        super(context, "Agenda", null, 6);
     }
 
     @Override
@@ -40,7 +40,7 @@ public class AlunoDAO extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         String sql = "";
         switch (oldVersion) {
-            case 3:
+            case 5:
                 sql = "ALTER TABLE Alunos ADD COLUMN caminhoFoto TEXT;";
                 db.execSQL(sql);
         }
