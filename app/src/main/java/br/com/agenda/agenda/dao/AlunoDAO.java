@@ -6,9 +6,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import br.com.agenda.agenda.modelo.Aluno;
 
@@ -19,7 +21,7 @@ import br.com.agenda.agenda.modelo.Aluno;
 public class AlunoDAO extends SQLiteOpenHelper {
 
     public AlunoDAO(Context context) {
-        super(context, "Agenda", null, 6);
+        super(context, "Agenda", null, 11);
     }
 
     @Override
@@ -30,7 +32,7 @@ public class AlunoDAO extends SQLiteOpenHelper {
                 "endereco TEXT, " +
                 "telefone TEXT, " +
                 "site TEXT, " +
-                "nota REAL" +
+                "nota REAL, " +
                 "caminhoFoto TEXT" +
                 ");";
         db.execSQL(sql);
@@ -40,10 +42,54 @@ public class AlunoDAO extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         String sql = "";
         switch (oldVersion) {
-            case 5:
+            case 8:
                 sql = "ALTER TABLE Alunos ADD COLUMN caminhoFoto TEXT;";
                 db.execSQL(sql);
+            case 9:
+
+                String criandoNovaTabela = "CREATE TABLE Alunos_novo " +
+                        "(id CHAR(36) PRIMARY KEY, " +
+                        "nome TEXT NOT NULL, " +
+                        "endereco TEXT, " +
+                        "telefone TEXT, " +
+                        "site TEXT, " +
+                        "nota REAL, " +
+                        "caminhoFoto TEXT" +
+                        ");";
+
+                db.execSQL(criandoNovaTabela);
+
+                String inserindoAlunosNaTabelaNova = "INSERT INTO Alunos_novo " +
+                        "(id, nome, endereco, telefone, site, nota, caminhoFoto) " +
+                        "SELECT id, nome, endereco, telefone, site, nota, caminhoFoto " +
+                        "FROM Alunos;";
+
+                db.execSQL(inserindoAlunosNaTabelaNova);
+
+                String removendoTabelaAntiga = "DROP TABLE Alunos;";
+
+                db.execSQL(removendoTabelaAntiga);
+
+                String alterandoNomeDaTabelaNova = "ALTER TABLE Alunos_novo " +
+                        "RENAME TO Alunos;";
+
+                db.execSQL(alterandoNomeDaTabelaNova);
+
+            case 10:
+                String buscaAlunos = "SELECT * FROM Alunos";
+                Cursor cursor = db.rawQuery(buscaAlunos, null);
+                List<Aluno> alunos = populaAlunos(cursor);
+
+                String atualizaIdDoAluno = "UPDATE Alunos SET id = ? WHERE id=?";
+
+                for (Aluno aluno : alunos) {
+                    db.execSQL(atualizaIdDoAluno, new String[]{geraUUID(), aluno.getId()});
+                }
         }
+    }
+
+    private String geraUUID() {
+        return UUID.randomUUID().toString();
     }
 
     public void insere(Aluno aluno) {
@@ -68,10 +114,17 @@ public class AlunoDAO extends SQLiteOpenHelper {
         String sql = "SELECT * FROM Alunos;";
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.rawQuery(sql, null);
+        List<Aluno> alunos = populaAlunos(cursor);
+        cursor.close();
+        return alunos;
+    }
+
+    @NonNull
+    private List<Aluno> populaAlunos(Cursor cursor) {
         List<Aluno> alunos = new ArrayList<>();
         while (cursor.moveToNext()) {
             Aluno aluno = new Aluno();
-            aluno.setId(cursor.getLong(cursor.getColumnIndex("id")));
+            aluno.setId(cursor.getString(cursor.getColumnIndex("id")));
             aluno.setNome(cursor.getString(cursor.getColumnIndex("nome")));
             aluno.setEndereco(cursor.getString(cursor.getColumnIndex("endereco")));
             aluno.setTelefone(cursor.getString(cursor.getColumnIndex("telefone")));
@@ -80,7 +133,6 @@ public class AlunoDAO extends SQLiteOpenHelper {
             aluno.setCaminhoFoto(cursor.getString(cursor.getColumnIndex("caminhoFoto")));
             alunos.add(aluno);
         }
-        cursor.close();
         return alunos;
     }
 

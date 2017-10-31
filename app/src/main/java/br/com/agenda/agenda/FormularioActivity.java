@@ -4,25 +4,27 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.io.File;
 
 import br.com.agenda.agenda.dao.AlunoDAO;
 import br.com.agenda.agenda.modelo.Aluno;
+import br.com.agenda.agenda.retrofit.RetrofitInicializador;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class FormularioActivity extends AppCompatActivity {
 
@@ -65,14 +67,6 @@ public class FormularioActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        if (requestCode == CODIGO_CAMERA) {
-//            ImageView foto = (ImageView) findViewById(R.id.formulario_foto);
-//            Bundle extras = data.getExtras();
-//            Bitmap bitmap = (Bitmap) extras.get("data");
-//            Bitmap bitmapReduzido = bitmap.createScaledBitmap(bitmap, 300, 300, true);
-//            foto.setImageBitmap(bitmapReduzido);
-//        }
-
         if (requestCode == 123 && resultCode == Activity.RESULT_OK) {
             helper.carregaImagem(caminhoFoto);
         }
@@ -97,6 +91,21 @@ public class FormularioActivity extends AppCompatActivity {
                     dao.insere(aluno);
                 }
                 dao.close();
+
+                Call<Void> call = new RetrofitInicializador().getAlunoService().insere(aluno);
+                call.enqueue(new Callback() {
+                    @Override
+                    public void onResponse(Call call, Response response) {
+                        Log.i("onResponse", "requisição com sucesso");
+                    }
+
+                    @Override
+                    public void onFailure(Call call, Throwable t) {
+                        Log.e("onFailure", "requisição falhou");
+                    }
+                });
+
+
                 Toast.makeText(FormularioActivity.this, "Aluno " + aluno.getNome() + " salvo!", Toast.LENGTH_SHORT).show();
                 finish();
                 break;

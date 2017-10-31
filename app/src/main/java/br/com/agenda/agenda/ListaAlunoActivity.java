@@ -14,14 +14,13 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import java.util.List;
 
 import br.com.agenda.agenda.adapter.AlunosAdapter;
-import br.com.agenda.agenda.converter.AlunoConverter;
 import br.com.agenda.agenda.dao.AlunoDAO;
 import br.com.agenda.agenda.modelo.Aluno;
+import br.com.agenda.agenda.task.EnviaAlunosTask;
 
 import static android.Manifest.permission.*;
 
