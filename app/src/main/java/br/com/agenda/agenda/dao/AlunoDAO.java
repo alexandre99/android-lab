@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +20,7 @@ import br.com.agenda.agenda.modelo.Aluno;
 public class AlunoDAO extends SQLiteOpenHelper {
 
     public AlunoDAO(Context context) {
-        super(context, "Agenda", null, 11);
+        super(context, "Agenda", null, 12);
     }
 
     @Override
@@ -45,7 +44,7 @@ public class AlunoDAO extends SQLiteOpenHelper {
             case 8:
                 sql = "ALTER TABLE Alunos ADD COLUMN caminhoFoto TEXT;";
                 db.execSQL(sql);
-            case 9:
+            case 11:
 
                 String criandoNovaTabela = "CREATE TABLE Alunos_novo " +
                         "(id CHAR(36) PRIMARY KEY, " +
@@ -75,16 +74,17 @@ public class AlunoDAO extends SQLiteOpenHelper {
 
                 db.execSQL(alterandoNomeDaTabelaNova);
 
-            case 10:
                 String buscaAlunos = "SELECT * FROM Alunos";
                 Cursor cursor = db.rawQuery(buscaAlunos, null);
                 List<Aluno> alunos = populaAlunos(cursor);
+                cursor.close();
 
                 String atualizaIdDoAluno = "UPDATE Alunos SET id = ? WHERE id=?";
 
                 for (Aluno aluno : alunos) {
                     db.execSQL(atualizaIdDoAluno, new String[]{geraUUID(), aluno.getId()});
                 }
+
         }
     }
 
@@ -94,13 +94,21 @@ public class AlunoDAO extends SQLiteOpenHelper {
 
     public void insere(Aluno aluno) {
         SQLiteDatabase db = getWritableDatabase();
+        insereIdSeNecessario(aluno);
         ContentValues dados = pegaDadosDoAluno(aluno);
         db.insert("Alunos", null, dados);
+    }
+
+    private void insereIdSeNecessario(Aluno aluno) {
+        if (aluno.getId() == null) {
+            aluno.setId(geraUUID());
+        }
     }
 
     @NonNull
     private ContentValues pegaDadosDoAluno(Aluno aluno) {
         ContentValues dados = new ContentValues();
+        dados.put("id", aluno.getId());
         dados.put("nome", aluno.getNome());
         dados.put("endereco", aluno.getEndereco());
         dados.put("telefone", aluno.getTelefone());
@@ -156,5 +164,24 @@ public class AlunoDAO extends SQLiteOpenHelper {
         int resultados = c.getCount();
         c.close();
         return resultados > 0;
+    }
+
+    public void sincronismo(List<Aluno> alunos) {
+        for (Aluno aluno : alunos) {
+            if (existe(aluno)) {
+                altera(aluno);
+            } else {
+                insere(aluno);
+            }
+        }
+    }
+
+    private boolean existe(Aluno aluno) {
+        SQLiteDatabase db = getReadableDatabase();
+        String existe = "SELECT id FROM Alunos WHERE id=? LIMIT 1;";
+        Cursor cursor = db.rawQuery(existe, new String[]{aluno.getId()});
+        int quantidade = cursor.getCount();
+        cursor.close();
+        return quantidade > 0;
     }
 }
