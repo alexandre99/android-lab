@@ -1,11 +1,13 @@
 package br.com.agenda.agenda;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -15,6 +17,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -35,6 +38,8 @@ public class ListaAlunoActivity extends AppCompatActivity {
     private ListView listaAlunos;
 
     public static final Integer CODIGO_SMS = 9;
+    private SwipeRefreshLayout swipe;
+    private ProgressDialog progess;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +47,15 @@ public class ListaAlunoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_lista_aluno);
 
         listaAlunos = (ListView) findViewById(R.id.lista_alunos);
+
+        swipe = (SwipeRefreshLayout) findViewById(R.id.swipe_lista_aluno);
+
+        swipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                buscaAlunos();
+            }
+        });
 
         listaAlunos.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -64,6 +78,8 @@ public class ListaAlunoActivity extends AppCompatActivity {
 
         registerForContextMenu(listaAlunos);
 
+        buscaAlunos();
+
         if (ActivityCompat.checkSelfPermission(ListaAlunoActivity.this, RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(ListaAlunoActivity.this, new String[]{RECEIVE_SMS}, CODIGO_SMS);
         }
@@ -72,7 +88,10 @@ public class ListaAlunoActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        carregarLista();
+    }
 
+    private void buscaAlunos() {
         Call<AlunoSync> call = new RetrofitInicializador().getAlunoService().lista();
         call.enqueue(new Callback<AlunoSync>() {
             @Override
@@ -82,15 +101,15 @@ public class ListaAlunoActivity extends AppCompatActivity {
                 dao.sincronismo(alunoSync.getAlunos());
                 dao.close();
                 carregarLista();
+                swipe.setRefreshing(false);
             }
 
             @Override
             public void onFailure(Call<AlunoSync> call, Throwable t) {
                 Log.e("onFailure", t.getMessage());
+                swipe.setRefreshing(false);
             }
         });
-
-        carregarLista();
     }
 
     @Override
@@ -173,10 +192,24 @@ public class ListaAlunoActivity extends AppCompatActivity {
         deletar.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                AlunoDAO dao = new AlunoDAO(ListaAlunoActivity.this);
-                dao.deleta(aluno);
-                dao.close();
-                carregarLista();
+                progess = ProgressDialog.show(ListaAlunoActivity.this, "Aguarde", "Apagando aluno");
+                Call<Void> call = new RetrofitInicializador().getAlunoService().deleta(aluno.getId());
+                call.enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        AlunoDAO dao = new AlunoDAO(ListaAlunoActivity.this);
+                        dao.deleta(aluno);
+                        dao.close();
+                        carregarLista();
+                        progess.dismiss();
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        progess.dismiss();
+                        Toast.makeText(ListaAlunoActivity.this, "Não foi possível remover o aluno", Toast.LENGTH_SHORT).show();
+                    }
+                });
                 return false;
             }
         });

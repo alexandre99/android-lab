@@ -3,24 +3,33 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <ListView
-        android:id="@+id/lista_alunos"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_lista_aluno"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content">
 
-    <Button android:id="@+id/novo_aluno"
+        <ListView
+            android:id="@+id/lista_alunos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+
+    <Button
+        android:id="@+id/novo_aluno"
         android:layout_width="56dp"
         android:layout_height="56dp"
-        android:text="+"
-        android:textColor="#ffffff"
-        android:textSize="40sp"
-        android:elevation="6dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_marginBottom="16dp"
         android:layout_marginRight="16dp"
         android:background="@drawable/fundo"
-        android:stateListAnimator="@null"/>
+        android:elevation="6dp"
+        android:stateListAnimator="@null"
+        android:text="+"
+        android:textColor="#ffffff"
+        android:textSize="40sp" />
 
 </RelativeLayout>
 

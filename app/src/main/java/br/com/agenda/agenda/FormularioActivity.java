@@ -2,6 +2,7 @@ package br.com.agenda.agenda;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -31,6 +32,7 @@ public class FormularioActivity extends AppCompatActivity {
     public static final int CODIGO_CAMERA = 123;
     private FormularioHelper helper;
     private String caminhoFoto;
+    private ProgressDialog progess;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +85,7 @@ public class FormularioActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu__formulario_ok:
-                Aluno aluno = helper.getAluno();
+                final Aluno aluno = helper.getAluno();
                 AlunoDAO dao = new AlunoDAO(this);
                 if (aluno.getId() != null) {
                     dao.altera(aluno);
@@ -92,21 +94,26 @@ public class FormularioActivity extends AppCompatActivity {
                 }
                 dao.close();
 
+                progess = ProgressDialog.show(FormularioActivity.this, "Aguarde", "Salvando aluno");
                 Call<Void> call = new RetrofitInicializador().getAlunoService().insere(aluno);
                 call.enqueue(new Callback() {
                     @Override
                     public void onResponse(Call call, Response response) {
                         Log.i("onResponse", "requisição com sucesso");
+                        progess.dismiss();
+                        Toast.makeText(FormularioActivity.this, "Aluno " + aluno.getNome() + " salvo!", Toast.LENGTH_SHORT).show();
+                        finish();
                     }
 
                     @Override
                     public void onFailure(Call call, Throwable t) {
                         Log.e("onFailure", "requisição falhou");
+                        progess.dismiss();
+                        finish();
                     }
                 });
 
 
-                Toast.makeText(FormularioActivity.this, "Aluno " + aluno.getNome() + " salvo!", Toast.LENGTH_SHORT).show();
                 finish();
                 break;
         }
