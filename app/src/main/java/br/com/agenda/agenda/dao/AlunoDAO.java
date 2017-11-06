@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,13 +21,13 @@ import br.com.agenda.agenda.modelo.Aluno;
 public class AlunoDAO extends SQLiteOpenHelper {
 
     public AlunoDAO(Context context) {
-        super(context, "Agenda", null, 12);
+        super(context, "Agenda", null, 1);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String sql = "CREATE TABLE Alunos (" +
-                "id INTEGER PRIMARY KEY, " +
+        String sql = "CREATE TABLE Alunos " +
+                "(id CHAR(36) PRIMARY KEY, " +
                 "nome TEXT NOT NULL, " +
                 "endereco TEXT, " +
                 "telefone TEXT, " +
@@ -39,53 +40,54 @@ public class AlunoDAO extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        String sql = "";
-        switch (oldVersion) {
-            case 8:
-                sql = "ALTER TABLE Alunos ADD COLUMN caminhoFoto TEXT;";
-                db.execSQL(sql);
-            case 11:
-
-                String criandoNovaTabela = "CREATE TABLE Alunos_novo " +
-                        "(id CHAR(36) PRIMARY KEY, " +
-                        "nome TEXT NOT NULL, " +
-                        "endereco TEXT, " +
-                        "telefone TEXT, " +
-                        "site TEXT, " +
-                        "nota REAL, " +
-                        "caminhoFoto TEXT" +
-                        ");";
-
-                db.execSQL(criandoNovaTabela);
-
-                String inserindoAlunosNaTabelaNova = "INSERT INTO Alunos_novo " +
-                        "(id, nome, endereco, telefone, site, nota, caminhoFoto) " +
-                        "SELECT id, nome, endereco, telefone, site, nota, caminhoFoto " +
-                        "FROM Alunos;";
-
-                db.execSQL(inserindoAlunosNaTabelaNova);
-
-                String removendoTabelaAntiga = "DROP TABLE Alunos;";
-
-                db.execSQL(removendoTabelaAntiga);
-
-                String alterandoNomeDaTabelaNova = "ALTER TABLE Alunos_novo " +
-                        "RENAME TO Alunos;";
-
-                db.execSQL(alterandoNomeDaTabelaNova);
-
-                String buscaAlunos = "SELECT * FROM Alunos";
-                Cursor cursor = db.rawQuery(buscaAlunos, null);
-                List<Aluno> alunos = populaAlunos(cursor);
-                cursor.close();
-
-                String atualizaIdDoAluno = "UPDATE Alunos SET id = ? WHERE id=?";
-
-                for (Aluno aluno : alunos) {
-                    db.execSQL(atualizaIdDoAluno, new String[]{geraUUID(), aluno.getId()});
-                }
-
-        }
+        Log.i("Info", String.valueOf(oldVersion));
+//        String sql = "";
+//        switch (oldVersion) {
+//            case 8:
+//                sql = "ALTER TABLE Alunos ADD COLUMN caminhoFoto TEXT;";
+//                db.execSQL(sql);
+//            case 13:
+//
+//                String criandoNovaTabela = "CREATE TABLE Alunos_novo " +
+//                        "(id CHAR(36) PRIMARY KEY, " +
+//                        "nome TEXT NOT NULL, " +
+//                        "endereco TEXT, " +
+//                        "telefone TEXT, " +
+//                        "site TEXT, " +
+//                        "nota REAL, " +
+//                        "caminhoFoto TEXT" +
+//                        ");";
+//
+//                db.execSQL(criandoNovaTabela);
+//
+//                String inserindoAlunosNaTabelaNova = "INSERT INTO Alunos_novo " +
+//                        "(id, nome, endereco, telefone, site, nota, caminhoFoto) " +
+//                        "SELECT id, nome, endereco, telefone, site, nota, caminhoFoto " +
+//                        "FROM Alunos;";
+//
+//                db.execSQL(inserindoAlunosNaTabelaNova);
+//
+//                String removendoTabelaAntiga = "DROP TABLE Alunos;";
+//
+//                db.execSQL(removendoTabelaAntiga);
+//
+//                String alterandoNomeDaTabelaNova = "ALTER TABLE Alunos_novo " +
+//                        "RENAME TO Alunos;";
+//
+//                db.execSQL(alterandoNomeDaTabelaNova);
+//
+//                String buscaAlunos = "SELECT * FROM Alunos";
+//                Cursor cursor = db.rawQuery(buscaAlunos, null);
+//                List<Aluno> alunos = populaAlunos(cursor);
+//                cursor.close();
+//
+//                String atualizaIdDoAluno = "UPDATE Alunos SET id = ? WHERE id=?";
+//
+//                for (Aluno aluno : alunos) {
+//                    db.execSQL(atualizaIdDoAluno, new String[]{geraUUID(), aluno.getId()});
+//                }
+//
+//        }
     }
 
     private String geraUUID() {
