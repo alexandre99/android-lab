@@ -113,8 +113,6 @@ public class FormularioActivity extends AppCompatActivity {
                     }
                 });
 
-
-                finish();
                 break;
         }
         return super.onOptionsItemSelected(item);

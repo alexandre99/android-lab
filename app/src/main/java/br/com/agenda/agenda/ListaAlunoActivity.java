@@ -106,7 +106,7 @@ public class ListaAlunoActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<AlunoSync> call, Throwable t) {
-                Log.e("onFailure", t.getMessage());
+                Log.e("onFailure", t.getMessage() + "\n" + t.getCause().toString());
                 swipe.setRefreshing(false);
             }
         });
