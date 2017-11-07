@@ -19,11 +19,16 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.List;
 
 import br.com.agenda.agenda.adapter.AlunosAdapter;
 import br.com.agenda.agenda.dao.AlunoDAO;
 import br.com.agenda.agenda.dto.AlunoSync;
+import br.com.agenda.agenda.event.AtualizaListaAlunoEvent;
 import br.com.agenda.agenda.modelo.Aluno;
 import br.com.agenda.agenda.retrofit.RetrofitInicializador;
 import br.com.agenda.agenda.task.EnviaAlunosTask;
@@ -45,6 +50,10 @@ public class ListaAlunoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lista_aluno);
+
+        EventBus eventBus = EventBus.getDefault();
+        eventBus.register(this);
+
 
         listaAlunos = (ListView) findViewById(R.id.lista_alunos);
 
@@ -106,7 +115,7 @@ public class ListaAlunoActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<AlunoSync> call, Throwable t) {
-                Log.e("onFailure", t.getMessage() + "\n" + t.getCause().toString());
+                Log.e("onFailure", t.getMessage());
                 swipe.setRefreshing(false);
             }
         });
@@ -218,7 +227,10 @@ public class ListaAlunoActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
 
-
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void atualizaListaAlunoEvent(AtualizaListaAlunoEvent event) {
+        carregarLista();
     }
 }

@@ -25,7 +25,7 @@ public class RetrofitInicializador {
 
         client.addInterceptor(interceptor);
 
-        retrofit = new Retrofit.Builder().baseUrl("http://10.62.15.30:8080/api/")
+        retrofit = new Retrofit.Builder().baseUrl("http://172.16.3.12:8080/api/")
                 .addConverterFactory(JacksonConverterFactory.create())
                 .client(client.build())
                 .build();

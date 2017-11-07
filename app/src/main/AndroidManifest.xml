@@ -19,6 +19,7 @@
 
     <application
         android:allowBackup="true"
+        android:name=".AgendaApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -78,7 +79,7 @@
         </service>
 
         <service
-            android:name=".firebase.AgendaFirebaseMessagingService">
+            android:name=".firebase.AgendaMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
