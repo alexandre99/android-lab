@@ -64,7 +64,6 @@ public class ListaAlunoActivity extends AppCompatActivity {
             @Override
             public void onRefresh() {
                 sincronizador.buscarTodos();
-                sincronizador.sincronizaAlunosInternos();
             }
         });
 
@@ -94,8 +93,6 @@ public class ListaAlunoActivity extends AppCompatActivity {
         if (ActivityCompat.checkSelfPermission(ListaAlunoActivity.this, RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(ListaAlunoActivity.this, new String[]{RECEIVE_SMS}, CODIGO_SMS);
         }
-
-        sincronizador.sincronizaAlunosInternos();
     }
 
     @Override
@@ -193,24 +190,14 @@ public class ListaAlunoActivity extends AppCompatActivity {
         deletar.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                progess = ProgressDialog.show(ListaAlunoActivity.this, "Aguarde", "Apagando aluno");
-                Call<Void> call = new RetrofitInicializador().getAlunoService().deleta(aluno.getId());
-                call.enqueue(new Callback<Void>() {
-                    @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
-                        AlunoDAO dao = new AlunoDAO(ListaAlunoActivity.this);
-                        dao.deleta(aluno);
-                        dao.close();
-                        carregarLista();
-                        progess.dismiss();
-                    }
 
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
-                        progess.dismiss();
-                        Toast.makeText(ListaAlunoActivity.this, "Não foi possível remover o aluno", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                AlunoDAO dao = new AlunoDAO(ListaAlunoActivity.this);
+                dao.deleta(aluno);
+                dao.close();
+                carregarLista();
+
+                sincronizador.deleta(aluno);
+                
                 return false;
             }
         });
