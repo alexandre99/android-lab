@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -63,6 +64,7 @@ public class ListaAlunoActivity extends AppCompatActivity {
             @Override
             public void onRefresh() {
                 sincronizador.buscarTodos();
+                sincronizador.sincronizaAlunosInternos();
             }
         });
 
@@ -92,6 +94,8 @@ public class ListaAlunoActivity extends AppCompatActivity {
         if (ActivityCompat.checkSelfPermission(ListaAlunoActivity.this, RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(ListaAlunoActivity.this, new String[]{RECEIVE_SMS}, CODIGO_SMS);
         }
+
+        sincronizador.sincronizaAlunosInternos();
     }
 
     @Override
@@ -131,6 +135,11 @@ public class ListaAlunoActivity extends AppCompatActivity {
     private void carregarLista() {
         AlunoDAO dao = new AlunoDAO(this);
         List<Aluno> alunos = dao.buscaAlunos();
+
+        for (Aluno aluno : alunos) {
+            Log.i("aluno sincronizado", String.valueOf(aluno.getSincronizado()));
+        }
+
         dao.close();
         AlunosAdapter adapter = new AlunosAdapter(this, alunos);
         listaAlunos.setAdapter(adapter);
@@ -214,7 +223,7 @@ public class ListaAlunoActivity extends AppCompatActivity {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void atualizaListaAlunoEvent(AtualizaListaAlunoEvent event) {
-        if(swipe.isRefreshing()) swipe.setRefreshing(false);
+        if (swipe.isRefreshing()) swipe.setRefreshing(false);
         carregarLista();
     }
 }

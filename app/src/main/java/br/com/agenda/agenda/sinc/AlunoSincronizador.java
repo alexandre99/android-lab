@@ -6,9 +6,12 @@ import android.util.Log;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.List;
+
 import br.com.agenda.agenda.dao.AlunoDAO;
 import br.com.agenda.agenda.dto.AlunoSync;
 import br.com.agenda.agenda.event.AtualizaListaAlunoEvent;
+import br.com.agenda.agenda.modelo.Aluno;
 import br.com.agenda.agenda.preferences.AlunoPreferences;
 import br.com.agenda.agenda.retrofit.RetrofitInicializador;
 import retrofit2.Call;
@@ -70,4 +73,24 @@ public class AlunoSincronizador {
             }
         };
     }
+
+    public void sincronizaAlunosInternos() {
+        final AlunoDAO dao = new AlunoDAO(context);
+        final List<Aluno> alunos = dao.listaNaoSincronizados();
+        Call<AlunoSync> call = new RetrofitInicializador().getAlunoService().atualiza(alunos);
+        call.enqueue(new Callback<AlunoSync>() {
+            @Override
+            public void onResponse(Call<AlunoSync> call, Response<AlunoSync> response) {
+                AlunoSync alunoSync = response.body();
+                dao.sincronismo(alunoSync.getAlunos());
+                dao.close();
+            }
+
+            @Override
+            public void onFailure(Call<AlunoSync> call, Throwable t) {
+                Log.e("Erro sincronizar", t.getMessage());
+            }
+        });
+    }
+
 }
